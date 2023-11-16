@@ -1,41 +1,43 @@
 // App.js
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchMovies } from './utils/api'; // Assuming this is the correct path to your api.js file
 
 function App() {
   const [movies, setMovies] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch movie data from the API
-    axios.get('https://api.themoviedb.org/3/account/20693124/favorite/movies?language=en-US&page=1&sort_by=created_at.asc', {
-      params: {
-        api_key: 'Bearer cf4d8fb3e32d1f38fd41fa0b0cf96851', // Replace with your actual API key
-        language: 'en-US',
-        page: 1,
-      },
-    })
-    .then(response => {
-      setMovies(response.data.results);
-    })
-    .catch(error => {
-      console.error('Error fetching movie data:', error);
-    });
+    const fetchData = async () => {
+      try {
+        console.log('Fetching data...');
+        const movieData = await fetchMovies();
+        console.log('Data fetched:', movieData);
+        setMovies(movieData);
+      } catch (err) {
+        setError('API request failed. Please try again later.'); // Customize the error message
+        console.error('Error fetching movie data:', err);
+      }
+    };
+  
+    fetchData();
   }, []);
-
   return (
     <div>
       <h1>Movie App</h1>
-      <div>
-        {/* Display movie information */}
-        {movies.map(movie => (
-          <div key={movie.id}>
-            <img src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`} alt={movie.title} />
-            <h2>{movie.title}</h2>
-            <p>{movie.overview}</p>
-          </div>
-        ))}
-      </div>
+      {error ? (
+        <p style={{ color: 'red' }}>{error}</p>
+      ) : (
+        <div>
+          {/* Display movie information */}
+          {movies.map((movie) => (
+            <div key={movie.id}>
+              <img src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`} alt={movie.title} />
+              <h2>{movie.title}</h2>
+              <p>{movie.overview}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
